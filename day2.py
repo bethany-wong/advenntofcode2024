@@ -16,7 +16,6 @@ def check_safety_with_tolerance(report): # part 2
             return True
     return False
 
-
 def main(input):
     safe_reports_count = 0
     safe_reports_with_tolerance_count = 0
@@ -32,7 +31,6 @@ def main(input):
 
     print(f"Number of safe reports: {safe_reports_count}")
     print(f"Number of safe reports with tolerance: {safe_reports_with_tolerance_count}")
-
 
 
 with open('inputs/day2', 'r') as file:
