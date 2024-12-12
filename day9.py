@@ -20,48 +20,32 @@ def part1(filesystem):
         right -= 1
     return filesystem
 
-def combine_spaces(filesystem):
-    pointer = 0
-    while(pointer < len(filesystem)):
-        if not filesystem[pointer]["is_file"] and pointer+1<len(filesystem) and not filesystem[pointer+1]["is_file"]:
-            filesystem[pointer]["count"] += filesystem[pointer + 1]["count"]
-            filesystem = filesystem[:pointer + 1] + filesystem[pointer + 2:] if pointer + 2 < len(filesystem) else filesystem[:pointer + 1]
-        else:
-            pointer += 1
-    return filesystem
+def find_space(filesystem, length, end):
+    template = ["." for _ in range(length)]
+    for i in range(end):
+        if filesystem[i:i+length] == template:
+            return i
+    return -1
 
-def part2(input):
-    filesystem = []
-    for i in range(len(input)):
-        if i % 2 == 0:
-            filesystem.append({"is_file":True, "count":int(input[i]), "value":int(i/2)})
-        else:
-            filesystem.append({"is_file": False, "count": int(input[i])})
-    i = len(filesystem) - 1
-    while i >= 0:
-        #print(convert_to_str_dict(filesystem))
-        if filesystem[i]["is_file"]:
-            required_space = filesystem[i]["count"] * len(str(filesystem[i]["value"]))
-            space = -1
-            for j in range(i):
-                if not filesystem[j]["is_file"] and filesystem[j]["count"] >= required_space:
-                        space = j
-                        break
-            if space > -1:
-                filesystem[space]["count"] -= required_space
-                i_value = filesystem[i]["value"]
-                if i < len(filesystem) - 1:
-                    filesystem = filesystem[:space] + [filesystem[i]] + [filesystem[space]] + filesystem[space+1:i] +  [{"is_file": False, "count": required_space}] + filesystem[i+1:]
+def part2(filesystem):
+    id = filesystem[-1]
+    while int(id) >= 0:
+        start_index = -1
+        end_index = -1
+        for i in range(len(filesystem)):
+            if filesystem[i] == id:
+                if start_index == -1:
+                    start_index = i
+                    end_index = i
                 else:
-                    filesystem = filesystem[:space] + [filesystem[i]] + [filesystem[space]] + filesystem[space+1:i] + [{"is_file": False, "count": required_space}]
-                filesystem = combine_spaces(filesystem)
-                if i_value == 0:
-                    break
-                for j in range(len(filesystem)):
-                    if filesystem[j]["is_file"] and filesystem[j]["value"] == i_value-1:
-                        i = j+1
-                        break
-        i -= 1
+                    end_index = i
+        required_space = (end_index - start_index + 1)
+        space_start = find_space(filesystem, required_space, start_index)
+        if space_start != -1:
+            for i in range(required_space):
+                filesystem[space_start + i] = filesystem[start_index + i]
+                filesystem[start_index + i] = "."
+        id = str(int(id) - 1)
     return filesystem
 
 def convert_to_str(input):
@@ -74,7 +58,7 @@ def convert_to_str(input):
         filesystem_index += int(input[i])
     return filesystem
 
-def convert_to_str_dict(input):
+def convert_to_str_from_dict(input):
     filesystem = []
     for element in input:
         filesystem += [str(element["value"]) if element["is_file"] else "." for _ in range(element["count"])]
@@ -83,4 +67,4 @@ def convert_to_str_dict(input):
 with open("inputs/day9", "r") as file:
     input = file.read()
 calculate_checksum(part1(convert_to_str(input)))
-calculate_checksum(convert_to_str_dict(part2(input)))
+calculate_checksum(part2(convert_to_str(input)))
